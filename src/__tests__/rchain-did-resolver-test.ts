@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Resolver, parse } from '../resolver'
+import { Resolver, parse, getResolver } from '../rchain-did-resolver'
 
 describe('resolver', () => {
   describe('parse()', () => {
@@ -160,6 +160,8 @@ describe('resolver', () => {
     beforeAll(() => {
       mockmethod = jest.fn().mockReturnValue(mockReturn)
       resolver = new Resolver({
+        ...getResolver(),
+
         example: async (did, parsed) => ({
           '@context': 'https://w3id.org/did/v1',
           id: did,
@@ -185,6 +187,22 @@ describe('resolver', () => {
       await expect(resolver.resolve('did:borg:')).rejects.toEqual(
         new Error('Invalid DID did:borg:')
       )
+    })
+
+    it('resolves rchain did', async () => {
+      await expect(
+        resolver.resolve(
+          'did:rchain:7ezuxgxi6e1exfwwtbeye3utd9i9ichun64eyfh44rx63a7yp9yceu'
+        )
+      ).resolves.toBeTruthy()
+    })
+
+    it('resolves rchain document', async () => {
+      await expect(
+        resolver.resolve(
+          'did:rchain:7ezuxgxi6e1exfwwtbeye3utd9i9ichun64eyfh44rx63a7yp9yceu/samplepdf'
+        )
+      ).resolves.toBeTruthy()
     })
 
     it('resolves did document', async () => {

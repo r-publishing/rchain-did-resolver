@@ -12,27 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import * as rchainToolkit from 'rchain-toolkit'
+const { readBagOrTokenDataTerm, read } = require('rchain-token-files')
+import { inflate } from 'pako'
+import * as u8a from 'uint8arrays'
+import { ec as EC } from 'elliptic'
+const ec = new EC('secp256k1')
+
 export interface DIDDocument {
   '@context': 'https://w3id.org/did/v1' | string | string[]
   id: string
   publicKey: PublicKey[]
   authentication?: (string | PublicKey | Authentication)[]
   /**
-  * @deprecated This does not appear in the did-core spec
-  */
+   * @deprecated This does not appear in the did-core spec
+   */
   uportProfile?: any
   service?: ServiceEndpoint[]
   /**
-  * @deprecated this property has been removed from the did-core spec
-  */
+   * @deprecated this property has been removed from the did-core spec
+   */
   created?: string
   /**
-  * @deprecated this property has been removed from the did-core spec
-  */
+   * @deprecated this property has been removed from the did-core spec
+   */
   updated?: string
   /**
-  * @deprecated this property has been removed from the did-core spec
-  */
+   * @deprecated this property has been removed from the did-core spec
+   */
   proof?: LinkedDataProof
   keyAgreement?: (string | PublicKey)[]
 }
@@ -56,8 +63,8 @@ export interface PublicKey {
 }
 
 /**
-* @deprecated The `authentication` array should be an array of strings or `PublicKey`
-*/
+ * @deprecated The `authentication` array should be an array of strings or `PublicKey`
+ */
 export interface Authentication {
   type: string
   publicKey: string
@@ -189,4 +196,100 @@ export class Resolver {
     }
     throw new Error(`Unsupported DID method: '${parsed.method}'`)
   }
+}
+
+export function encodeDIDFromPubKey(publicKey: string): string {
+  const pubBytes = ec.keyFromPublic(publicKey, 'hex').getPublic(true, 'array')
+  const bytes = new Uint8Array(pubBytes.length + 2)
+  bytes[0] = 0xe7 // secp256k1 multicodec
+  // The multicodec is encoded as a varint so we need to add this.
+  // See js-multicodec for a general implementation
+  bytes[1] = 0x01
+  bytes.set(pubBytes, 2)
+  return `did:key:z${u8a.toString(bytes, 'base58btc')}`
+}
+
+export function getResolver() {
+  async function resolve(
+    did: string,
+    parsed: ParsedDID,
+    didResolver: Resolver
+  ): Promise<any> {
+    console.log(parsed)
+    // {method: 'mymethod', id: 'abcdefg', did: 'did:mymethod:abcdefg/some/path#fragment=123', path: '/some/path', fragment: 'fragment=123'}
+
+    let term
+
+    if (parsed.path && parsed.path !== '') {
+      term = readBagOrTokenDataTerm(
+        parsed.id,
+        'bags',
+        parsed.path?.substring(1)
+      )
+    } else {
+      term = read(parsed.id)
+    }
+
+    const ed = await rchainToolkit.http.exploreDeploy(
+      'https://observer.testnet.rchain.coop',
+      {
+        term: term
+      }
+    )
+
+    if (parsed.path && parsed.path !== '') {
+      let fileAsJson: any = {}
+      try {
+        const dataAtNameBuffer = Buffer.from(
+          decodeURI(rchainToolkit.utils.rhoValToJs(JSON.parse(ed).expr[0])),
+          'base64'
+        )
+        const unzippedBuffer = Buffer.from(inflate(dataAtNameBuffer))
+        const fileAsString = unzippedBuffer.toString('utf-8')
+        fileAsJson = JSON.parse(fileAsString)
+        console.info(fileAsJson)
+
+        //fileAsJson.data = Buffer.from(fileAsJson.data, 'base64').toString(
+        //  'utf-8'
+        //)
+      } finally {
+      }
+      // If you need to lookup another did as part of resolving this did document, the primary DIDResolver object is passed in as well
+      //const parentDID = await didResolver.resolve(...)
+      //
+      return fileAsJson
+    } else {
+      //try {
+      const contractData = rchainToolkit.utils.rhoValToJs(
+        JSON.parse(ed).expr[0]
+      )
+      const did = encodeDIDFromPubKey(contractData.publicKey)
+      const keyid = did.substr(8)
+      const did2 = did + '#' + keyid
+
+      const ret = {
+        id: did,
+        publicKey: [
+          {
+            id: did2,
+            type: 'Secp256k1VerificationKey2018',
+            controller: did2,
+            publicKeyHex: contractData.publicKey
+          } as PublicKey
+        ]
+      } as DIDDocument
+
+      console.info('returning: ')
+      console.info(ret)
+
+      return ret //{} as DIDDocument
+      //}
+      //finally {}
+    }
+
+    console.info('JSON.parse(ed):')
+    console.info(JSON.parse(ed).expr[0])
+  }
+
+  return { rchain: resolve }
 }

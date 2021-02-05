@@ -1,7 +1,7 @@
-# Javascript DID Resolver
-[![CircleCI](https://circleci.com/gh/decentralized-identity/did-resolver.svg?style=svg)](https://circleci.com/gh/decentralized-identity/did-resolver)
-[![codecov](https://codecov.io/gh/decentralized-identity/did-resolver/branch/master/graph/badge.svg)](https://codecov.io/gh/decentralized-identity/did-resolver)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/6dc5e3f01b1148698b0378d771341253)](https://www.codacy.com/manual/uport-project/did-resolver?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=uport-project/did-resolver&amp;utm_campaign=Badge_Grade)
+# Javascript DID:RCHAIN Resolver
+[![CircleCI](https://circleci.com/gh/decentralized-identity/rchain-did-resolver.svg?style=svg)](https://circleci.com/gh/decentralized-identity/rchain-did-resolver)
+[![codecov](https://codecov.io/gh/decentralized-identity/rchain-did-resolver/branch/master/graph/badge.svg)](https://codecov.io/gh/decentralized-identity/rchain-did-resolver)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/6dc5e3f01b1148698b0378d771341253)](https://www.codacy.com/manual/uport-project/rchain-did-resolver?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=uport-project/rchain-did-resolver&amp;utm_campaign=Badge_Grade)
 
 
 This library is intended as a simple common interface for javascript applications to resolve DID documents from Decentralized Identifiers (DIDs).
@@ -30,10 +30,10 @@ You are now required to preconfigure a resolver during instantiation. The `Resol
 
 Each method resolver should expose a function called `getResolver` which will return an object containing one of these key/value pairs. Then you can flatten them into one object to pass into the `Resolver` constructor. 
 ```js
-import { Resolver } from 'did-resolver'
-import ethr from 'ethr-did-resolver'
-import web from 'web-did-resolver'
-import sov from 'sov-did-resolver'
+import { Resolver } from 'rchain-did-resolver'
+import ethr from 'ethr-rchain-did-resolver'
+import web from 'web-rchain-did-resolver'
+import sov from 'sov-rchain-did-resolver'
 
 //returns an object of { methodName: resolveFunction}
 ethrResolver = ethr.getResolver()
@@ -102,7 +102,7 @@ Each DID method will have its own methods for looking up an identifier on its re
 
 To avoid misconfiguration, method implementers should export a `getResolver()` function which returns an object mapping the method name to a `resolve(did: string, parsed: ParsedDID, didResolver: DIDResolver)` function. e.g. `{ ethr: resolve }`.
 
-The resolve function should accept a did string, and an object of type [ParsedDID](https://github.com/decentralized-identity/did-resolver/blob/develop/src/resolver.ts#L51)
+The resolve function should accept a did string, and an object of type [ParsedDID](https://github.com/TheoXD/rchain-did-resolver/blob/develop/src/resolver.ts#L51)
 
 ```js
 export function getResolver() {
@@ -127,8 +127,8 @@ export function getResolver() {
 The MyMethod `getResolver()` result could then be passed into the DIDResolver constructor. Note that it should be flattened if used with other methods as well. 
 
 ```js
-import { DIDResolver } from 'did-resolver'
-import MyMethod from 'mymethod-did-resolver'
+import { DIDResolver } from 'rchain-did-resolver'
+import MyMethod from 'mymethod-rchain-did-resolver'
 
 const myResolver = MyMethod.getResolver()
 const resolver = new DIDResolver(myResolver)
