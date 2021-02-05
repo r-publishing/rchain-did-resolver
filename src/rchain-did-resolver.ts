@@ -215,9 +215,6 @@ export function getResolver() {
     parsed: ParsedDID,
     didResolver: Resolver
   ): Promise<any> {
-    console.log(parsed)
-    // {method: 'mymethod', id: 'abcdefg', did: 'did:mymethod:abcdefg/some/path#fragment=123', path: '/some/path', fragment: 'fragment=123'}
-
     let term
 
     if (parsed.path && parsed.path !== '') {
@@ -247,11 +244,7 @@ export function getResolver() {
         const unzippedBuffer = Buffer.from(inflate(dataAtNameBuffer))
         const fileAsString = unzippedBuffer.toString('utf-8')
         fileAsJson = JSON.parse(fileAsString)
-        console.info(fileAsJson)
 
-        //fileAsJson.data = Buffer.from(fileAsJson.data, 'base64').toString(
-        //  'utf-8'
-        //)
       } finally {
       }
       // If you need to lookup another did as part of resolving this did document, the primary DIDResolver object is passed in as well
@@ -259,7 +252,6 @@ export function getResolver() {
       //
       return fileAsJson
     } else {
-      //try {
       const contractData = rchainToolkit.utils.rhoValToJs(
         JSON.parse(ed).expr[0]
       )
@@ -279,16 +271,9 @@ export function getResolver() {
         ]
       } as DIDDocument
 
-      console.info('returning: ')
-      console.info(ret)
+      return ret
 
-      return ret //{} as DIDDocument
-      //}
-      //finally {}
     }
-
-    console.info('JSON.parse(ed):')
-    console.info(JSON.parse(ed).expr[0])
   }
 
   return { rchain: resolve }
