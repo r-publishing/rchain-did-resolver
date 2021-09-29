@@ -13,7 +13,12 @@
 // limitations under the License.
 
 import * as rchainToolkit from 'rchain-toolkit'
-const { readBagOrTokenDataTerm, read } = require('rchain-token-files')
+const {
+  readPursesDataTerm,
+  readAllPursesTerm,
+  decodePurses,
+  readBoxTerm
+} = require('rchain-token')
 import { inflate } from 'pako'
 import * as u8a from 'uint8arrays'
 import { ec as EC } from 'elliptic'
@@ -217,63 +222,39 @@ export function getResolver() {
   ): Promise<any> {
     let term
 
-    if (parsed.path && parsed.path !== '') {
-      term = readBagOrTokenDataTerm(
-        parsed.id,
-        'bags',
-        parsed.path?.substring(1)
-      )
-    } else {
-      term = read(parsed.id)
-    }
+    term = readBoxTerm({
+      masterRegistryUri: parsed.id,
+      boxId: parsed.path?.substring(1)
+    })
 
-    const ed = await rchainToolkit.http.exploreDeploy(
-      'https://observer.testnet.rchain.coop',
+    const readBoxResult = await rchainToolkit.http.exploreDeploy(
+      'https://node0.pub.dev.rchain.coop',
       {
         term: term
       }
     )
 
-    if (parsed.path && parsed.path !== '') {
-      let fileAsJson: any = {}
-      try {
-        const dataAtNameBuffer = Buffer.from(
-          decodeURI(rchainToolkit.utils.rhoValToJs(JSON.parse(ed).expr[0])),
-          'base64'
-        )
-        const unzippedBuffer = Buffer.from(inflate(dataAtNameBuffer))
-        const fileAsString = unzippedBuffer.toString('utf-8')
-        fileAsJson = JSON.parse(fileAsString)
+    const box = rchainToolkit.utils.rhoValToJs(
+      JSON.parse(readBoxResult).expr[0]
+    )
 
-      } finally {
-      }
-      // If you need to lookup another did as part of resolving this did document, the primary DIDResolver object is passed in as well
-      //const parentDID = await didResolver.resolve(...)
-      //
-      return fileAsJson
-    } else {
-      const contractData = rchainToolkit.utils.rhoValToJs(
-        JSON.parse(ed).expr[0]
-      )
-      const did = encodeDIDFromPubKey(contractData.publicKey)
-      const keyid = did.substr(8)
-      const did2 = did + '#' + keyid
+    const didString = encodeDIDFromPubKey(box.publicKey)
+    const keyid = didString.substr(8)
+    const did2 = didString + '#' + keyid
 
-      const ret = {
-        id: did,
-        publicKey: [
-          {
-            id: did2,
-            type: 'Secp256k1VerificationKey2018',
-            controller: did2,
-            publicKeyHex: contractData.publicKey
-          } as PublicKey
-        ]
-      } as DIDDocument
+    const ret = {
+      id: didString,
+      publicKey: [
+        {
+          id: did2,
+          type: 'Secp256k1VerificationKey2018',
+          controller: did2,
+          publicKeyHex: box.publicKey
+        } as PublicKey
+      ]
+    } as DIDDocument
 
-      return ret
-
-    }
+    return ret
   }
 
   return { rchain: resolve }

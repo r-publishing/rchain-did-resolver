@@ -8550,19 +8550,19 @@ rc@^1.0.1, rc@^1.1.6, rc@^1.2.8:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-rchain-token-files@fabcotech/rchain-token#aaf8df2b9715608f307647989f5f8f3e24565bae:
-  version "4.0.0"
-  resolved "https://codeload.github.com/fabcotech/rchain-token/tar.gz/aaf8df2b9715608f307647989f5f8f3e24565bae"
+"rchain-token@https://github.com/fabcotech/rchain-token.git":
+  version "7.0.0"
+  resolved "https://github.com/fabcotech/rchain-token.git#496b21e212e3ca3bd665154fa60feba54c4a8051"
   dependencies:
     blakejs "^1.1.0"
     dotenv "6.2.0"
-    rchain-toolkit "0.2.8"
+    rchain-toolkit "0.3.2"
     uuid "3.4.0"
 
-rchain-toolkit@0.2.8, rchain-toolkit@^0.2.8:
-  version "0.2.8"
-  resolved "https://registry.yarnpkg.com/rchain-toolkit/-/rchain-toolkit-0.2.8.tgz#af27a15250718ab69a0865b82a8b55de68731964"
-  integrity sha512-PQFL2QA3e6T4aYhWZYIumiCWaIMK9uiUXD4bGyjSkhbi7cvwRQfEif+DBw/5xm0BxlZObZy//ZpU80MxIy2Emg==
+rchain-toolkit@0.3.2, rchain-toolkit@^0.3.2:
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/rchain-toolkit/-/rchain-toolkit-0.3.2.tgz#3e3a2062c13963280f06c7edd02d2b59437c6028"
+  integrity sha512-Pgn8rXF6brkZ1227SNiZioDGd0V8BF0jPmqcKd2ftxejTI6FI/x+OA7AgjoR9mCnBDWn4TjRN3Rvm0ji/GnOQA==
   dependencies:
     blakejs "^1.1.0"
     elliptic "6.5.3"
