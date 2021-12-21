@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as rchainToolkit from 'rchain-toolkit'
+import * as rchainToolkit_ from 'rchain-toolkit'
+const rchainToolkit = rchainToolkit_
+
 const {
   readPursesDataTerm,
   readAllPursesTerm,
@@ -228,7 +230,7 @@ export function getResolver() {
     })
 
     const readBoxResult = await rchainToolkit.http.exploreDeploy(
-      'https://gracious-pare-6c4c99.netlify.app',
+      'http://localhost:40403',
       {
         term: term
       }
